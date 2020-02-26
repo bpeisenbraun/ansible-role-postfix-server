@@ -1,0 +1,92 @@
+# Ansible managed /etc/postfix/main.cf
+# 
+# Change to yes for debugging
+soft_bounce = no
+#soft_bounce = yes
+
+# General settings, listeners, destinations
+mydomain = klatsch.org
+myhostname = whiskey.klatsch.org
+myorigin = $mydomain
+mynetworks_style = subnet
+mydestination = $mydomain, $myhostname
+mynetworks = 127.0.0.0/8, 23.92.19.4/32
+inet_interfaces = all
+inet_protocols = ipv4
+#inet_protocols = all
+smtp_address_preference = ipv4
+mail_owner = postfix
+unknown_local_recipient_reject_code = 550
+smtpd_banner = $myhostname ESMTP
+
+# User-oriented settings
+biff = no
+forward_path = $home/.forward$recipient_delimiter$extension,$home/.forward
+recipient_delimiter = +
+#default_destination_concurrency_limit = 2
+local_destination_concurrency_limit = 2
+mailbox_size_limit = 900000000
+message_size_limit = 40960000
+home_mailbox = Mail/
+
+# Aliases
+alias_database = hash:/etc/aliases
+alias_maps = hash:/etc/aliases
+
+# Virtual domains
+#virtual_alias_maps = hash:/etc/postfix/virtual
+                     ##hash:/var/lib/mailman/data/virtual-mailman
+
+# Relaying/transports
+#relay_domains = /etc/postfix/relay_domains
+fast_flush_domains = $relay_domains
+#transport_maps = hash:/etc/postfix/transport
+
+# Security/privacy
+disable_vrfy_command = yes
+maps_rbl_reject_code = 554
+
+# SMTP settings -- outgoing mail
+smtp_destination_concurrency_limit = 2
+smtp_destination_recipient_limit = 2
+
+# SMTPD settings -- incoming mail
+smtpd_client_restrictions = permit_mynetworks, permit_sasl_authenticated, reject_unauth_destination, reject_rbl_client zen.spamhaus.org
+smtpd_delay_reject = yes
+smtpd_helo_required = yes
+smtpd_helo_restrictions = reject_non_fqdn_hostname
+smtpd_relay_restrictions = permit_mynetworks, permit_sasl_authenticated, defer_unauth_destination
+smtpd_recipient_restrictions = permit_mynetworks, permit_sasl_authenticated, reject_unauth_destination
+smtpd_sender_restrictions = permit_mynetworks, reject_unknown_sender_domain, warn_if_reject, reject_non_fqdn_sender
+
+# SASL
+smtpd_sasl_type = dovecot
+smtpd_sasl_path = private/auth
+smtpd_sasl_auth_enable = yes
+smtpd_sasl_security_options = noanonymous
+broken_sasl_auth_clients = yes
+
+# Global TLS settings
+tls_random_source = dev:/dev/urandom
+
+# SMTP TLS settings
+smtp_use_tls = yes
+smtp_tls_note_starttls_offer = yes
+smtp_tls_mandatory_protocols = !SSLv2,!SSLv3
+smtp_tls_protocols = !SSLv2,!SSLv3
+
+# SMTPD TLS settings
+smtpd_tls_auth_only = yes
+smtpd_tls_security_level = may
+smtpd_tls_cert_file = /etc/letsencrypt/live/whiskey.klatsch.org/fullchain.pem
+smtpd_tls_key_file = /etc/letsencrypt/live/whiskey.klatsch.org/privkey.pem
+smtpd_tls_loglevel = 1
+smtpd_tls_ciphers = high
+smtpd_tls_mandatory_protocols = !SSLv2,!SSLv3
+smtpd_tls_protocols = !SSLv2,!SSLv3
+smtpd_tls_received_header = yes
+smtpd_tls_session_cache_timeout = 3600s
+
+debugger_command = PATH=/bin:/usr/bin:/usr/local/bin:/usr/X11R6/bin xxgdb $daemon_directory/$process_name $process_id & sleep 5
+
+compatibility_level = 2

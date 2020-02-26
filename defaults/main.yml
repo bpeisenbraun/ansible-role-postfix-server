@@ -1,0 +1,3 @@
+---
+# defaults file for role-postfix
+postfix_aliases: []

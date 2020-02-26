@@ -1,0 +1,49 @@
+---
+- name: Install postfix and mail tools
+  apt:
+    name: postfix
+    state: "{{ pkgversion|default('present') }}"
+
+- name: Copy postfix config files into place
+  copy:
+    src: "etc/postfix/{{ item }}"
+    dest: "/etc/postfix/{{ item }}"
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart_postfix
+  with_items:
+    - main.cf
+    - master.cf
+
+- name: Write out postfix aliases template
+  template:
+    src: etc/aliases.j2
+    dest: /etc/aliases
+    owner: root
+    group: root
+    mode: 0644
+  notify: rebuild_aliases
+  tags:
+    - update-aliases
+
+#- name: Copy postfix virtuals config into place
+#copy:
+  #src: etc/postfix/{{ item }}
+  #dest: /etc/postfix/{{ item }}
+  #owner: root
+  #group: root
+  #mode: 0644
+  #with_items:
+    #- virtual
+    #register: virtuals_updated
+    #tags:
+      #- update-virtuals
+
+#- name: Rebuild virtuals db
+#command: /usr/sbin/postmap /etc/postfix/{{ item }}
+#with_items:
+  #- virtual
+  #when: virtuals_updated.changed
+  #tags:
+    #- update-virtuals

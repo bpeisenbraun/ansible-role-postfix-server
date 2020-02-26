@@ -1,0 +1,18 @@
+# Ansible managed postfix aliases
+# 
+####
+# System/domain aliases
+webmaster:        root
+abuse:            root
+security:         root
+postmaster:       root
+mailer-daemon:    root
+
+# Spam aliases
+spam:            /dev/null
+bounces:         /dev/null
+
+# Users
+{% for alias in postfix_aliases %}
+{{ alias.local }}: {{ alias.dest }}
+{% endfor %}
